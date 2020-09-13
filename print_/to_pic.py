@@ -8,3 +8,5 @@ def plt2pic(data_act):
             plt.show()
         except:
             print(data_act)
+        #this just is a prac
+        #don't be affread
