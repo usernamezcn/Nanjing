@@ -78,10 +78,10 @@ for i in load_data_from_orcale():
     end_result_cp = end_result.__deepcopy__()
     # print('\n模型二输出的故障类型及概率：\n', end_result)
     # print('最大值：', max(end_result.values[0]))
-    min_value = min(end_result.values[0])
+    max_value = max(end_result.values[0])
     broken_result = []  # 用来存放异常/故障的原因，S1-S17
     for i in end_result.columns:
-        if float(min_value) == float(end_result[i]):
+        if float(max_value) == float(end_result[i]):
             broken_result.append(i)
             print('故障可能为{}:{}'.format(i,S[i]))
     # print('*************************模型二完美通过***********************')
