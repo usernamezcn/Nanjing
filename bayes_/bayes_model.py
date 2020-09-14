@@ -32,6 +32,7 @@ def main_model_two(result):
 
 
     pe = ParameterEstimator(model, data)
+
     # print("\n", pe.state_counts('S1'))
 
     '''对模型和数据进行   极大似然估计  train'''
@@ -88,16 +89,19 @@ def main_model_two(result):
     # for i in model2.get_cpds():
     #     print(i.variable)
 
-    # infer2 = VariableElimination(model2)
+    infer2 = VariableElimination(model2)
 
     '''   其中的“S4”代表我们需要求的概率，如果需要求多个，用逗号隔开
         evidence代cpds(表各个数据异常是否存在'''
-    # result = infer2.query(['S4'],evidence = {"X1":1,"X2":1,"X3":1,"X4":1,"X5":1,"X6":1
-    #                                          ,"X7":1,"X8":1,"X9":1})
+    result = infer2.query(['S4'],evidence = {"X1":0.0,"X2":0.0,"X3":1.0,"X4":0.0,"X5":0.0,"X6":0.0
+                                             ,"X7":0.0,"X8":0.0,"X9":0.0})
+    # print('S1de 频率&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-----------------------:')
     # print(result)
     pre_result = model2.predict_probability(pre_data)
     # pre_result = pre_result[:,8:]
     # print(pre_result.head())
+    for i in pre_result.columns:
+        pre_result[i].values[0] = 1-pre_result[i].values[0]
     end_result = pd.DataFrame(pre_result,columns=['S1_0.0','S2_0.0','S3_0.0','S4_0.0','S5_0.0','S6_0.0','S7_0.0','S8_0.0',
                                     'S9_0.0','S10_0.0','S11_0.0','S12_0.0','S13_0.0','S14_0.0','S15_0.0','S16_0.0',
                                     'S17_0.0'])
