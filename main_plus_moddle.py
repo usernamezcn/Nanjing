@@ -145,7 +145,7 @@ for i in load_data_from_orcale():
         test_oracle.insert(sql_insert_1, param_1)
     except:
         print('中间表一插入失败')
-    test_oracle = TestOracle('mw_app', 'app', '127.0.0.1', '1521', 'DBORCALE')
+    test_oracle = TestOracle('mw_app', 'app', '127.0.0.1', '1521', 'ORCL_200')
     try:
         test_oracle.insert(sql_insert_2, param_2)
     except:
