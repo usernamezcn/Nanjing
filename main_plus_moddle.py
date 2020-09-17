@@ -30,13 +30,14 @@ for i in load_data_from_orcale():
     # print('输出判断值为：：：：：：：：：：：：：：：：：：：：：：：：',model_one_temp)
     data_act = i['data']
     DEVICECODE = i['DeviceCode']
-    print(i['MonitorTypeName'])
+    # print(i['MonitorTypeName'])
     # if i['MonitorTypeName']=='风偏监测':
     #     print(data_act)\
-    print('进入模型一')
+    # print('进入模型一')
     # time.sleep(1000)
+    plt2pic(data_act)
     result = main_model_one(data_act)
-    print('模型给一出口')
+    # print('模型给一出口')
     # print('长度*********************************************：：：：：：：：：：：：：：：')
     # print(len(data_act))
 
@@ -48,6 +49,7 @@ for i in load_data_from_orcale():
         Ins2Orc.insert_(state = 0,b_r='None',result_dict=init_result_dict,DEVICECODE=DEVICECODE,result_cp=result_cp,end_result_cp=init_end_result)
         continue
     plt2pic(data_act)
+    # time.sleep(4)
     # print('result\n',result)
     '''模型一的输出'''
 
@@ -60,13 +62,7 @@ for i in load_data_from_orcale():
     # print('*************************模型一完美通过***********************')
 
     '''模型二的输出'''
-    print('*********************************************')
     end_result = main_model_two(result)
-    print('*********************************************')
-
-    '''
-       !!!!!      做没有错误的处理！
-    '''
     '''
     if result.values[0].tolist()==[0]*9:
         end_result = pd.DataFrame([0]*17,index=['S1_0.0', 'S2_0.0', 'S3_0.0', 'S4_0.0', 'S5_0.0', 'S6_0.0', 'S7_0.0', 'S8_0.0',
@@ -155,3 +151,4 @@ for i in load_data_from_orcale():
     except:
         print('中间表二插入失败')
     print('一个数据跑完了&&&&&一个数据跑完了&&&&&一个数据跑完了&&&&&一个数据跑完了&&&&&一个数据跑完了&&&&&一个数据跑完了')
+    time.sleep(10)
