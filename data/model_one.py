@@ -79,6 +79,7 @@ def abnormal_x2(l_data,data):
                 if miss == num_x2_miss - 1: l_data[item_data] = 3;
     return l_data
 
+
 #数据重复
 def abnormal_x3(l_data,data):
     error_data = [0] * len(data)
@@ -129,13 +130,9 @@ def abnormal_x5(l_data,data):
     for item_data in range(len(data)-num_zero):
         if (l_data[item_data] != 0):#如果存在故障
             for miss in range(num_zero):
-                if (data[item_data+miss] != [0]): break;
+                if (data[item_data+miss] != 0.0): break;
                 if miss == num_zero - 1: l_data[item_data] = 6;#如果存在连续num_zero个0,则赋6
     return l_data
-
-def three_sigma(data):
-
-    pass
 
 def sigma_(data):
     std_ = data['b'].std()
@@ -145,10 +142,10 @@ def sigma_(data):
     length_ = len(data['b'])
     len_error = 0
     for i in range(length_):
-        if (data['b'][i] <= sigma_max) or (data['b'][i] >= sigma_min): len_error += 1
+        if (data['b'][i] > sigma_max) or (data['b'][i] < sigma_min): len_error += 1
     error_end = len_error / length_
-    if error_end>=0.9947:return True
-    else:return False
+    if error_end>=0.0027:return False  #越小越严谨
+    else:return True
 
 
 
@@ -161,7 +158,8 @@ def func_jump_error(value):
     data_series = pd.Series(value['b'].values, index=value['b'].index)
 
     '''报错！！！！！！！！！'''
-    try:temp = set(grubbs.test(data_series, alpha=0.01))
+    try:
+        temp = set(grubbs.test(data_series, alpha=0.01))
     except:return []
     # print(temp)
     # all_right_data = func_jump_error((data_series))
@@ -176,7 +174,7 @@ def func_jump_error(value):
 '''数据连续增长(降低)'''
 def abnormal_x6_x8(data,data_list):
     #两者的共同点
-    if sigma_(data)==False:return 0
+    if sigma_(data)==True:return 0
     # if data.std().values[0]<data.mean().values[0]*0.2:#如果存在的短时连续突增或突降小于某个值，则不进行x6,x8判定
     #     return 0
     #两者的区分
@@ -205,35 +203,25 @@ def abnormal_x6_x7(data,data_list):
 
     # if data.std().values[0]<data.mean().values[0]*0.2:#如果存在的短时连续突增或突降小于某个值，则不进行x6,x8判定
     #     return 0
-    if sigma_(data) == False: return 0
-
-    start1 = time.time()
-    num_jump = 1
-    for i in range(len(data_list) - 1):
-        if data_list[i] == None:
-            pass
-        elif (abs(data_list[i + 1] - data_list[i]) >= jump):
-            num_jump += 1
-
-
-    start2 = time.time()
-    print('x6_x7中的时间消耗1',start2-start1)
-    residal_list,standard_num,standard_num_up = [],0,1
-    standard = residal(data_list)
-    residal_list.append(standard)
-    start3 = time.time()
-    print('x6_x7中的时间消耗2', start3 - start2)
+    if sigma_(data) == True: return 0
+    # print(data)
+    # start2 = time.time()
+    residal_list,standard_num = [],0
+    three_sigma = 3*(data.std()[0])
+    residal_list.append(three_sigma)
+    # start3 = time.time()
+    # print('x6_x7中的时间消耗2', start3 - start2)
     for item_x6_x7 in range(1,len(data_list)-1):
         k_temp = residal(data_list[0:item_x6_x7])+residal(data_list[item_x6_x7:len(data_list)-1])
         residal_list.append(k_temp)
-        if k_temp>3*standard:
+        if k_temp<three_sigma:
             standard_num+=1
-    start4 = time.time()
-    print('x6_x7中的时间消耗3', start4 - start3)
+    # start4 = time.time()
+    # print('x6_x7中的时间消耗3', start4 - start3)
     residal_list.append(residal(data_list))
-    if (standard_num_up>1)and(abs(standard_num_up-num_jump)<3):
+    if standard_num>0:
         return 7
-    elif standard_num_up==1:
+    else:
         return 6
 
 '''数据抖动'''
@@ -250,7 +238,7 @@ def abnormal_x8_x9(data,data_list):
         data_copy = data_copy[~data_copy['b'].isin([item_right])]
     print(data_copy)#data_copy 表示离群点
     '''
-    if sigma_(data) == False: return 0
+    if sigma_(data) == True: return 0
     out = func_jump_error(data)
     if len(out)<3:
         return 0
@@ -267,12 +255,10 @@ def abnormal_x8_x9(data,data_list):
 # data_act = pd.read_csv('../ice.csv', header=None)
 
 def main_model_one(data_act):
-    start = time.time()
     result = [0.0] * 9
     print_range_num = 0
     columns_ = data_act.columns[0]
     data_act.rename(columns={columns_: 'b'}, inplace=True)
-    img = [0] * len(data_act)
     data_list = data_act['b'].tolist()
     for item in range(sliding_num+1):#滑动窗口大小设置，正式算法接近完成的时候将对data进行限定。
         data = data_act
@@ -283,16 +269,12 @@ def main_model_one(data_act):
         error_data = proform(data,data_list)
         # error_data_x_5 = abnormal_x5(error_data,data)
         # print(error_data_x_5)
-
-
         '''空值的处理'''
         v_count = data['b'].value_counts()
         if len(v_count)==0:
             result[1] = 1.0
             return pd.DataFrame(result,index = ['X1','X2','X3','X4','X5','X6','X7','X8','X9']).T
 
-
-        print('进入error1')
         error_x1 = abnormal_x1(error_data, data)
         if 2 in error_x1:
             result[0] = 1.0
@@ -316,30 +298,24 @@ def main_model_one(data_act):
         # print(error_x5)
         #
         #
-        end1 = time.time()
-        print('x1-x5的运行时间：',end1-start)
         alt = abnormal_x6_x8(data,data_list)
         if alt==8:
             result[7] = 1.0
         elif alt == 6:
             result[5] = 1.0
-        end2 = time.time()
-        print('******************的运行时间：', end2 - end1)
         alt = abnormal_x6_x7(data,data_list)
         if alt==7:
             result[6] = 1.0
         elif alt==6:
             result[5] = 1.0
-        end3 = time.time()
-        print('******************的运行时间：', end3 - end2)
         alt = abnormal_x8_x9(data,data_list)
         if alt==9:
             result[8] = 1.0
         elif alt==8:
             result[7] = 1.0
+        # result = [0.0]*9
+        # result[1] = 1.0
         result = pd.DataFrame(result,index = ['X1','X2','X3','X4','X5','X6','X7','X8','X9']).T
-        end4 = time.time()
-        print('******************的运行时间：', end4 - end3)
     return result
         # print(result)
 
@@ -348,5 +324,6 @@ def main_model_one(data_act):
 
     #结果保存
     # result_act.to_csv('train_model_1_result.csv',index=None,columns = None,header=['X1','X2','X3','X4','X5','X6','X7','X8','X9'])
+
 
 
