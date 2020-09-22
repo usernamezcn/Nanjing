@@ -4,7 +4,7 @@ from fault_.fault_describe import X, S
 from fault_.des import SS
 from data_.model_one import main_model_one
 from bayes_.bayes_model import main_model_two
-from Traversing_database import load_data_from_orcale
+from Oracle_.Traversing_database import load_data_from_orcale
 from fuzzy_.fuzzy_model import weight, W_weight, s_mat_weight
 from Oracle_.oracle import TestOracle
 from Oracle_.Insert_to_orcale import Ins2Orc
@@ -48,7 +48,10 @@ for i in load_data_from_orcale():
         if result.iloc[0,i] == 1.0:model_one_temp = 1;break;
 
     if model_one_temp == 0:
-        Ins2Orc.insert_(state = 0,b_r='None',result_dict=init_result_dict,DEVICECODE=DEVICECODE,result_cp=result_cp,end_result_cp=init_end_result)
+        Ins2Orc.insert_(state = 0,b_r='',result_dict=init_result_dict,DEVICECODE=DEVICECODE,result_cp=result_cp,end_result_cp=init_end_result)
+        # Ins2Orc.insert_(state=state, b_r=broken_result, result_dict=result_dict, DEVICECODE=DEVICECODE,
+        #                 result_cp=result_cp,
+        #                 end_result_cp=end_result_cp)
         continue
     plt2pic(data_act)
     # time.sleep(4)
@@ -94,6 +97,7 @@ for i in load_data_from_orcale():
         end_result = end_result[columns]
         w_weight = W_weight(s_mat_weight, end_result.loc[i].values)
         result = np.dot(w_weight, weight)
+        result = result*100
         # print('\n模型三的评判结果：')
         '''0:正常 1：异常 2：故障'''
         result_ = pd.DataFrame(result, index=['正常', '异常', '故障'], columns=['result'])
@@ -107,14 +111,16 @@ for i in load_data_from_orcale():
     broken_result = ','.join(broken_result)  # 取出列表中的所有元素
     broken_reason = ','.join(broken_reason)
 
-    print('远程数据库测试-----------------------------------------------------:')
-    print(broken_reason)
-    print(broken_result)
-    exit(0)
+    # print('远程数据库测试-----------------------------------------------------:')
+    # print(broken_reason)
+    # print(broken_result)
     # print('*************************模型三完美通过***********************')
     '''模型三结果存入数据库'''
-    test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+    # test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+    Ins2Orc.insert_(state = state, b_r=broken_result, result_dict=result_dict, DEVICECODE=DEVICECODE, result_cp=result_cp,
+                    end_result_cp=end_result_cp)
     # param=[('30M00000059982619','(正常：0.3；异常：0.5；故障：0.2)','异常',time.strftime("%Y/%m/%D %H:%M:%S")),]
+    '''
     param = [(DEVICECODE, datetime.datetime.now(), state, broken_result, result_dict['0'], result_dict['1'], result_dict['2'],broken_reason), ]
     param_1 = [
         (DEVICECODE, datetime.datetime.now(), int(result_cp.iloc[0, 0]), int(result_cp.iloc[0, 1]),
@@ -144,7 +150,6 @@ for i in load_data_from_orcale():
 
     # param = [(DEVICECODE, state, b_r, result_dict['0'], result_dict['1'], result_dict['2']), ]
     try:
-        '''插入数据'''
         # sql_insert = 'insert into BHT_DEVICE_STATUS(DEVICECODE,DEVICE_STATUS,BROKEN_RESULT,STATUS_0,STATUS_1,STATUS_2)values(:1,:3,:4,:5,:6,:7)'
         test_oracle.insert(sql_insert, param)
 
@@ -153,7 +158,6 @@ for i in load_data_from_orcale():
 
 
 
-    '''
     test_oracle = TestOracle('mw_app', 'app', '127.0.0.1', '1521', 'DBORCALE')
     try:
         test_oracle.insert(sql_insert_1, param_1)
