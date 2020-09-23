@@ -48,7 +48,7 @@ for i in load_data_from_orcale():
         if result.iloc[0,i] == 1.0:model_one_temp = 1;break;
 
     if model_one_temp == 0:
-        Ins2Orc.insert_(state = 0,b_r='',result_dict=init_result_dict,DEVICECODE=DEVICECODE,result_cp=result_cp,end_result_cp=init_end_result)
+        Ins2Orc.insert_(state = 0,b_r='',result_dict=init_result_dict,DEVICECODE=DEVICECODE,result_cp=result_cp,end_result_cp=init_end_result,broken_reason='')
         # Ins2Orc.insert_(state=state, b_r=broken_result, result_dict=result_dict, DEVICECODE=DEVICECODE,
         #                 result_cp=result_cp,
         #                 end_result_cp=end_result_cp)
@@ -118,7 +118,7 @@ for i in load_data_from_orcale():
     '''模型三结果存入数据库'''
     # test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
     Ins2Orc.insert_(state = state, b_r=broken_result, result_dict=result_dict, DEVICECODE=DEVICECODE, result_cp=result_cp,
-                    end_result_cp=end_result_cp)
+                    end_result_cp=end_result_cp,broken_reason = broken_reason)
     # param=[('30M00000059982619','(正常：0.3；异常：0.5；故障：0.2)','异常',time.strftime("%Y/%m/%D %H:%M:%S")),]
     '''
     param = [(DEVICECODE, datetime.datetime.now(), state, broken_result, result_dict['0'], result_dict['1'], result_dict['2'],broken_reason), ]
