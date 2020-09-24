@@ -149,7 +149,7 @@ def sigma_(data):
 
 
 def increase(data_list):
-    part_list,above,max_above,part,persent_to_error = [],0,0,20,0.25
+    part_list,above,below,max_above,part,persent_to_error = [],0,0,0,20,0.25
     length = len(data_list)
     part_len = length//part
     try:
@@ -159,10 +159,13 @@ def increase(data_list):
         return False
     for i in range(part-1):
         if part_list[i+1]-part_list[i]>0:
+            below = 0
             above+=1
             max_above = max(max_above,above)
         else:
             above = 0
+            below+=1
+            max_above = max(max_above, below)
     if (max_above/part)>persent_to_error:
         return True
     else:
