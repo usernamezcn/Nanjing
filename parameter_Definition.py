@@ -8,7 +8,7 @@ import copy
 
 '''从数据库中获取数据'''
 # connect参数  用户名、密码、host地址：端口、服务名
-test_oracle=TestOracle('mw_app','app','127.0.0.1','1521','DBORCALE')
+test_oracle=TestOracle('mw_app','app','192.168.2.200', '1521', 'ORCL')
 print("连接成功")
 def str_to_int(num):
     a,b = num.split('/')
