@@ -29,9 +29,9 @@ sliding_num = 0
 # num_need_repeat = 4
 
 
-
 '''提前将数据进行处理，find重复、缺失跳变、为零的数据标记为异常数据'''
 '''error_data作为返回值，当erro_data==1时代表存在以上异常情况中的一种或多种'''
+
 def proform(data,data_list):
     '''数据重复,需要有几个重复,才会构成装置故障'''
     repeat_num_to_wrong = 2
@@ -124,8 +124,8 @@ def abnormal_x3(l_data,data):
 '''数据固定偏移---检测值与实际值的差别'''
 def abnormal_x4(l_data,data):
     pass
-
 '''数据为零'''
+
 def abnormal_x5(l_data,data):
     for item_data in range(len(data)-num_zero):
         if (l_data[item_data] != 0):#如果存在故障
@@ -149,28 +149,24 @@ def sigma_(data):
 
 
 def increase(data_list):
-    part_list,above,below,max_above,part,persent_to_error = [],0,0,0,20,0.25
+    part_list, above, max_above, part, persent_to_error = [], 0, 0, 20, 0.25
     length = len(data_list)
-    part_len = length//part
+    part_len = length // part
     try:
         for i in range(part):
-            part_list.append(np.mean(data_list[i*part_len:(i+1)*part_len]))
+            part_list.append(np.mean(data_list[i * part_len:(i + 1) * part_len]))
     except:
         return False
-    for i in range(part-1):
-        if part_list[i+1]-part_list[i]>0:
-            below = 0
-            above+=1
-            max_above = max(max_above,above)
+    for i in range(part - 1):
+        if part_list[i + 1] - part_list[i] > 0:
+            above += 1
+            max_above = max(max_above, above)
         else:
             above = 0
-            below+=1
-            max_above = max(max_above, below)
-    if (max_above/part)>persent_to_error:
+    if max_above / part > persent_to_error:
         return True
     else:
         return False
-
 
 
 
@@ -184,13 +180,12 @@ def func_jump_error(value):
 
     '''报错！！！！！！！！！'''
     try:
-        temp = set(grubbs.test(data_series, alpha=0.01))
+        temp = set(grubbs.test(data_series, alpha=0.06))
     except:return []
     # print(temp)
     # all_right_data = func_jump_error((data_series))
     all_right_data = list(temp)
-    for item_right in all_right_data:
-        data_copy = data_copy[~data_copy['b'].isin([item_right])]
+    data_copy = data_copy[~data_copy['b'].isin(all_right_data)]
     # print(data_copy)  # data_copy 表示离群点
     # jump_error = set(value) - set(list(grubbs.test(value,alpha=0.01)))
     # return list(jump_error)
@@ -237,7 +232,7 @@ def abnormal_x6_x7(data,data_list):
     # start3 = time.time()
     # print('x6_x7中的时间消耗2', start3 - start2)
     for item_x6_x7 in range(1,len(data_list)-1):
-        k_temp = residal(data_list[0:item_x6_x7])+residal(data_list[item_x6_x7:len(data_list)-1])
+        k_temp =np.var(data_list[0:item_x6_x7])*len(data_list[0:item_x6_x7])+np.var(data_list[item_x6_x7:len(data_list)-1])*len(data_list[item_x6_x7:len(data_list)-1])
         residal_list.append(k_temp)
         if k_temp<three_sigma:
             standard_num+=1
@@ -279,6 +274,17 @@ def abnormal_x8_x9(data,data_list):
 
 def main_model_one(data_act):
     result = [0.0] * 9
+
+    '''
+    !!!!!!!!!!!!!!      ATTENTION 
+    等不测试的时候将下面的代码注释解除 
+    同时需要修改Traversing_database.py
+    '''
+
+    # if data_act.empty==True:
+    #     result[1] = 1.0
+    #     print('空')
+    #     return pd.DataFrame(result, index=['X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8', 'X9']).T
     print_range_num = 0
     columns_ = data_act.columns[0]
     data_act.rename(columns={columns_: 'b'}, inplace=True)
@@ -303,19 +309,17 @@ def main_model_one(data_act):
         error_x5 = abnormal_x5(error_data, data_list)
         result[4] = 1.0 if 6 in error_x5 else 0.0
         if increase(data_list):result[5] = 1.0
+        else:result[5] = 0.0
         if abnormal_x6_x8(data,data_list)==8:
             result[7] = 1.0
         alt = abnormal_x6_x7(data,data_list)
         if alt==7:
             result[6] = 1.0
-        elif alt==6:
-            result[5] = 1.0
         alt = abnormal_x8_x9(data,data_list)
         if alt==9:
             result[8] = 1.0
         elif alt==8:
             result[7] = 1.0
+        if result[4]==1.0:result[2] = 0.0
         result = pd.DataFrame(result,index = ['X1','X2','X3','X4','X5','X6','X7','X8','X9']).T
-        if result.iloc[0, 4] == 1.0:
-            result.iloc[0, 2] = 0.0
     return result
