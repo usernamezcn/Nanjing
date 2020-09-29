@@ -200,7 +200,7 @@ def abnormal_x6_x8(data,data_list):
     #两者的区分
     D_value = []
     for item_x6 in range(len(data_list)-1):
-        if (data_list[item_x6]==None) or(data_list[item_x6+1] == None):continue
+        if (data_list[item_x6]==None) or (data_list[item_x6+1] == None): continue
         D_value.append(abs(float(data_list[item_x6])-float(data_list[item_x6+1])))
     if len(D_value) == 0:return 0
     else:data_x6 = set(grubbs.test(D_value, alpha=0.01))
@@ -216,7 +216,6 @@ def residal(data):#求残差
         if residal_item == None:continue
         sum+=(float(residal_item)-mean_)**2
     return sum
-    pass
 
 '''数据跳边'''
 def abnormal_x6_x7(data,data_list):
@@ -264,7 +263,6 @@ def abnormal_x8_x9(data,data_list):
         return 9
     else:
         return 8
-    pass
 
 
 '''error_x1到5是list类型，value(元素）-1，代表发生的故障类型'''
@@ -276,7 +274,8 @@ def main_model_one(data_act):
     result = [0.0] * 9
 
     '''
-    !!!!!!!!!!!!!!      ATTENTION 
+    !!!!!!!!!!!!!!      ATTENTION      判空处理     ATTENTION !!!!!!!!!!!!!!!!!!!
+    
     等不测试的时候将下面的代码注释解除 
     同时需要修改Traversing_database.py
     '''
