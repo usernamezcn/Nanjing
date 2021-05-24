@@ -11,16 +11,18 @@ os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 
 
 
-
 class Ins2Orc(object):
     def __init__(self,user,pwd,ip,port,sid):
         self.connect=cx_Oracle.connect(user+"/"+pwd+"@"+ip+":"+port+"/"+sid)
         self.cursor=self.connect.cursor()
 
     def insert_(state,b_r,result_dict,DEVICECODE,result_cp,end_result_cp,broken_reason):
+
         # test_oracle = TestOracle('mw_app', 'app', '127.0.0.1', '1521', 'DBORCALE')
-        test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
-        # param=[('30M00000059982619','(正常：0.3；异常：0.5；故障：0.2)','异常',time.strftime("%Y/%m/%D %H:%M:%S")),]
+        # test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+        test_oracle = TestOracle()
+        # param=[('30M00000059982619','(正常：0.3；异常：0.5；故障：0.2)','异常',time.s
+        # trftime("%Y/%m/%D %H:%M:%S")),]
         param = [
             (DEVICECODE, datetime.datetime.now(), state, b_r, result_dict['0'], result_dict['1'], result_dict['2'],broken_reason), ]
         param_1 = [
@@ -54,21 +56,27 @@ class Ins2Orc(object):
         try:
             '''插入数据'''
             # sql_insert = 'insert into BHT_DEVICE_STATUS(DEVICECODE,DEVICE_STATUS,BROKEN_RESULT,STATUS_0,STATUS_1,STATUS_2)values(:1,:3,:4,:5,:6,:7)'
-            print('最终表插入成功')
+            #print('最终表插入成功')
             test_oracle.insert(sql_insert, param)
         except:
             print('最终表插入失败')
-        test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+            pass
+        # test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+        test_oracle = TestOracle()
         try:
             test_oracle.insert(sql_insert_1, param_1)
-            print('中间表一插入成功')
+            #print('中间表一插入成功')
         except:
             print('中间表一插入失败')
-        test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+            pass
+        # test_oracle = TestOracle('mw_app', 'app', '192.168.2.200', '1521', 'ORCL')
+        test_oracle = TestOracle()
         try:
             test_oracle.insert(sql_insert_2, param_2)
-            print('中间表二插入成功')
+            #print('中间表二插入成功')
         except:
             print('中间表二插入失败')
+            pass
 
-
+#127.0.0.1
+#192.168.2.200
