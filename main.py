@@ -1,5 +1,5 @@
 import sys
-sys.path.append('F:\GNanjing')
+sys.path.append('F:\Reliability_Evaluation')
 from fault_.fault_describe import X, S
 from fault_.des import SS
 from data_.model_one import main_model_one
@@ -12,8 +12,9 @@ from Oracle_.Insert_to_orcale import Ins2Orc
 from print_.to_pic import plt2pic
 import numpy as np
 import pandas as pd
-import datetime,time,os
+import datetime,time,os,io
 import schedule
+import configparser
 
 pd.set_option('display.max_columns', 1000)
 pd.set_option('display.width', 1000)       #输出全部元素
@@ -24,12 +25,37 @@ init_end_result.columns = ['S1_0.0','S2_0.0','S3_0.0','S4_0.0','S5_0.0','S6_0.0'
                         'S9_0.0','S10_0.0','S11_0.0','S12_0.0','S13_0.0','S14_0.0','S15_0.0','S16_0.0',
                         'S17_0.0']
 init_result = pd.DataFrame([0.0]*9,index = ['X1','X2','X3','X4','X5','X6','X7','X8','X9']).T
-init_result_dict = {'0':0.0,'1':0.0,'2':0.0}
+init_result_dict = {'0':1.0,'1':0.0,'2':0.0}
+
+def config():
+    cf = configparser.ConfigParser()
+    cf.read('F:/Reliability_Evaluation/config.ini')
+    return cf.get('time_setting','day'),cf.get('time_setting','clock')
+
+    pass
+
+class Logger(object):
+    def __init__(self, filename="Default.log", path="./"):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        self.terminal = sys.stdout
+        self.log = open(os.path.join(path, filename), "a", encoding='utf8')
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        pass
 
 
 def main():
-    num_day = 22 #每月的一号开始运行，如果需要在每月2号运行，请将k改为2
-    if datetime.datetime.now().day == num_day:
+    sys.stdout = Logger('main_log.log')
+    num_day,asdf = config()
+    # print(num_day)
+    # print(type(num_day))
+    # num_day = 1 #每月的一号开始运行，如果需要在每月2号运行，请将k改为2
+    # print(datetime.datetime.now().day,type(datetime.datetime.now().day))
+    if datetime.datetime.now().day == int(num_day):
         try:
             for i in load_data_from_orcale():
                 broken_reason = []
@@ -43,10 +69,10 @@ def main():
 
 
                 DEVICECODE = i['DeviceCode']
+
                 # print(i['MonitorTypeName'])
                 # if i['MonitorTypeName']=='风偏监测':
                 #     print(data_act)\
-                # print('进入模型一')
                 # time.sleep(1000)
                 # print('检测类型：{}                状态量为：{}'.format(i['MonitorTypeName'],univariate[i['MonitorTypeName']]))
                 # plt2pic(data_act)
@@ -192,7 +218,10 @@ def main():
 
 
 if __name__ == '__main__':
-    schedule.every().day.at("16:24").do(main)   #如果需要修改时间点的话可以在这里修改。
+    asdf,clock = config()
+    print(clock)
+    print(type(clock))
+    schedule.every().day.at(clock).do(main)   #如果需要修改时间点的话可以在这里修改。
     while True:
         schedule.run_pending()
 
