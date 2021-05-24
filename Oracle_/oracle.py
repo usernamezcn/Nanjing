@@ -9,7 +9,7 @@ os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 """python version 3.7"""
 
 class TestOracle(object):
-    def __init__(self,user,pwd,ip,port,sid):
+    def __init__(self,user = 'mw_app',pwd = 'app',ip = '192.168.2.200',port = '1521',sid = 'ORCL'):
         self.connect=cx_Oracle.connect(user+"/"+pwd+"@"+ip+":"+port+"/"+sid)
         self.cursor=self.connect.cursor()
 
@@ -61,9 +61,9 @@ class TestOracle(object):
         try:
             self.cursor.executemany(sql,list_param)
             self.connect.commit()
-            print("插入成功")
+            # print("插入成功")
         except Exception as e:
-            print(e)
+            print('CRSB' + e)
         finally:
             self.disconnect()
     def update(self,sql):
