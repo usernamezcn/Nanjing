@@ -1,0 +1,9 @@
+numpy
+pandas
+scipy
+pickle
+pgmpy
+cx_Oracle
+matplotlib
+configparser
+schedule
